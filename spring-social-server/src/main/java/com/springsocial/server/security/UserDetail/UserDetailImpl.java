@@ -2,6 +2,7 @@ package com.springsocial.server.security.UserDetail;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.springsocial.server.models.User;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Data
 public class UserDetailImpl implements UserDetails {
     private Long id;
 
@@ -24,15 +26,17 @@ public class UserDetailImpl implements UserDetails {
     @JsonIgnore
     private String password;
 
+    private String location;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailImpl(Long id, String name, String username, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailImpl(Long id, String name, String username, String email, String password, Collection<? extends GrantedAuthority> authorities, String location) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
         this.authorities = authorities;
+        this.location = location;
     }
 
     public static UserDetailImpl create(User user) {
@@ -46,7 +50,8 @@ public class UserDetailImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
-                authorities
+                authorities,
+                user.getLocation()
         );
     }
 

@@ -1,7 +1,11 @@
 package com.springsocial.server.dto.response;
 
+import com.springsocial.server.models.User;
+import lombok.Data;
+
 import java.util.List;
 
+@Data
 public class JwtResponse {
     private String token;
     private String type = "Bearer";
@@ -10,6 +14,9 @@ public class JwtResponse {
     private String username;
     private String email;
     private List<String> roles;
+    private User user;
+    private String location;
+
 
     public JwtResponse(String accessToken, String refreshToken, Long id, String username, String email, List<String> roles) {
         this.token = accessToken;
@@ -17,6 +24,13 @@ public class JwtResponse {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.roles = roles;
+    }
+
+    public JwtResponse(String token, String location, User user, List<String> roles) {
+        this.token = token;
+        this.location = location;
+        this.user = user;
         this.roles = roles;
     }
 
@@ -74,5 +88,13 @@ public class JwtResponse {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

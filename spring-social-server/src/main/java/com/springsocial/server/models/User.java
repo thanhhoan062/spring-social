@@ -45,16 +45,29 @@ public class User extends DateAudit {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
+    @Size(max = 1200)
+    private String location;
+
     public User() {
 
     }
 
-    public User(String name, String username, String email, String password) {
+    public User(String name, String username, String email, String password, String location) {
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.location = location;
     }
+    public User(Long id, String name, String username, String email, String location) {
+        this.id = id;
+        this.name = name;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.location = location;
+    }
+
 
     public Long getId() {
         return id;
@@ -93,5 +106,13 @@ public class User extends DateAudit {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }

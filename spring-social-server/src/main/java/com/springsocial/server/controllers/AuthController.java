@@ -29,6 +29,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,7 +55,7 @@ public class AuthController {
 
 
     // With not refresh token
-    @PostMapping("/signin")
+    @PostMapping("/login")
     public ResponseEntity<?> authenticateUserWithAccessToken(@Valid @RequestBody LoginRequestDTO loginRequestDTO) throws Exception {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -72,11 +73,15 @@ public class AuthController {
                     .map(item -> item.getAuthority())
                     .collect(Collectors.toList());
 
-            return ResponseEntity.ok(new JwtResponse(jwt, null,
+            User user = new User(
                     userDetails.getId(),
+                    userDetails.getName(),
                     userDetails.getUsername(),
                     userDetails.getEmail(),
-                    roles));
+                    userDetails.getLocation()
+                    );
+
+            return ResponseEntity.ok(new JwtResponse(jwt, user.getLocation(), user, roles));
 
         } catch (Exception e) {
             throw new Exception(e.getMessage());
@@ -122,7 +127,7 @@ public class AuthController {
                         "Refresh token is not in database!"));
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequestDTO signupRequestDTO) {
         if (userRepository.existsByUsername(signupRequestDTO.getUsername())) {
             return ResponseEntity
@@ -137,7 +142,8 @@ public class AuthController {
         // Create new user's account
         User user = new User(signupRequestDTO.getName(), signupRequestDTO.getUsername(),
                 signupRequestDTO.getEmail(),
-                encoder.encode(signupRequestDTO.getPassword()));
+                encoder.encode(signupRequestDTO.getPassword()),
+                signupRequestDTO.getLocation());
 
         Set<String> strRoles = signupRequestDTO.getRole();
 
@@ -170,12 +176,24 @@ public class AuthController {
         user.setRoles(roles);
         user.setCreatedAt(Instant.now());
         user.setUpdatedAt(Instant.now());
-        User result = userRepository.save(user);
+        User result = userRepository.saveAndFlush(user);
 
-        URI location = ServletUriComponentsBuilder
+        /*URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/api/users/{username}")
                 .buildAndExpand(result.getUsername()).toUri();
 
-        return ResponseEntity.created(location).body(new MessageResponse( "User registered successfully"));
+        return ResponseEntity.created(location).body(new MessageResponse( "User registered successfully"));*/
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        signupRequestDTO.getUsername(),
+                        signupRequestDTO.getPassword())
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String jwt = jwtTokenProvider.generateTokenWithAuthentication(authentication);
+
+        return ResponseEntity.ok(new JwtResponse(jwt, user.getLocation(), user, new ArrayList<>(strRoles)));
     }
 }

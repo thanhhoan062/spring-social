@@ -1,10 +1,13 @@
 package com.springsocial.server.dto.request;
 
+import lombok.Data;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Set;
 
+@Data
 public class SignupRequestDTO {
     @NotBlank
     @Size(min = 4, max = 40)
@@ -24,6 +27,8 @@ public class SignupRequestDTO {
     @NotBlank
     @Size(min = 6, max = 40)
     private String password;
+
+    private String location;
 
     public String getUsername() {
         return username;
